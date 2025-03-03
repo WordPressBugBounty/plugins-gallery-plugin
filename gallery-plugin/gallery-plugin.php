@@ -6,7 +6,7 @@ Description: Add beautiful galleries, albums & images to your WordPress website 
 Author: BestWebSoft
 Text Domain: gallery-plugin
 Domain Path: /languages
-Version: 4.7.3
+Version: 4.7.4
 Author URI: https://bestwebsoft.com/
 License: GPLv2 or later
  */
@@ -270,7 +270,7 @@ if ( ! function_exists( 'export_gallery_to_csv' ) ) {
 						$images_shortpixel[] = isset( $image_postmeta['gallery_images_shortpixel'] ) ? $image_postmeta['gallery_images_shortpixel'][0] : '';
 					}
 				}
-				$export_str .= $wpdb->prepare( '%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;' . PHP_EOL, $title, $content, maybe_serialize( $categories ), $featured_image, maybe_serialize( $images_url ), maybe_serialize( $images_title ), maybe_serialize( $images_alt ), maybe_serialize( $images_text ), maybe_serialize( $images_order ), maybe_serialize( $images_shortpixel ) );
+				$export_str .= $wpdb->prepare( '%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;' . PHP_EOL, $title, $content, json_encode( $categories ), $featured_image, json_encode( $images_url ), json_encode( $images_title ), json_encode( $images_alt ), json_encode( $images_text ), json_encode( $images_order ), json_encode( $images_shortpixel ) );
 			}
 		}
 
@@ -304,12 +304,20 @@ if ( ! function_exists( 'import_gallery_from_csv' ) ) {
 		WP_Filesystem();
 
 		$upload_dir = wp_upload_dir();
+		if ( empty( $_FILES['gllr_csv_file']['tmp_name'] ) ) {
+			$gllr_upload_errors = __( 'Select a file to import data', 'gallery-plugin' );
+			return;
+		}
 		$file_name = $_FILES['gllr_csv_file']['tmp_name'];
 
 		$csv_as_array = $wp_filesystem->get_contents( $file_name );
 		$csv_as_array = explode( PHP_EOL, $csv_as_array );
 		foreach( $csv_as_array as $key => $value ) {
 			$csv_as_array[ $key ] = explode( "';'", trim( $value, "';" ) );
+		}
+		if ( isset( $csv_as_array[0] ) && isset( $csv_as_array[0][0] ) && 'Gallery Title' != $csv_as_array[0][0] ) {
+			$gllr_upload_errors = __( 'An invalid file was uploaded to import gallery data.', 'gallery-plugin' );
+			return;
 		}
 		unset( $csv_as_array[0] );
 		foreach( $csv_as_array as $csv_string ) {
@@ -326,7 +334,7 @@ if ( ! function_exists( 'import_gallery_from_csv' ) ) {
 			);
 			$post_id = wp_insert_post( $post );
 			$gallery_terms = array();
-			$categories    = maybe_unserialize( stripslashes_deep( $csv_string[2] ) );
+			$categories    = json_decode( stripslashes_deep( $csv_string[2] ) );
 			if ( ! empty( $categories ) ) {
 				foreach( $categories as $term ) {
 					$term_exists = term_exists( $term[0], 'gallery_categories' );
@@ -352,12 +360,16 @@ if ( ! function_exists( 'import_gallery_from_csv' ) ) {
 			wp_set_object_terms( $post_id, $gallery_terms, 'gallery_categories' );
 			$featured_image = stripslashes_deep( $csv_string[3] );
 
-			$images_url   = maybe_unserialize( stripslashes_deep( $csv_string[4] ) );
-			$images_title = maybe_unserialize( stripslashes_deep( $csv_string[5] ) );
-			$images_alt   = maybe_unserialize( stripslashes_deep( $csv_string[6] ) );
-			$images_text  = maybe_unserialize( stripslashes_deep( $csv_string[7] ) );
-			$images_order = maybe_unserialize( stripslashes_deep( $csv_string[8] ) );
-			$images_shortpixel = maybe_unserialize( stripslashes_deep( $csv_string[9] ) );
+			$images_url   = json_decode( stripslashes_deep( $csv_string[4] ) );
+			$images_title = json_decode( stripslashes_deep( $csv_string[5] ) );
+			$images_alt   = json_decode( stripslashes_deep( $csv_string[6] ) );
+			$images_text  = json_decode( stripslashes_deep( $csv_string[7] ) );
+			$images_order = json_decode( stripslashes_deep( $csv_string[8] ) );
+			$images_shortpixel = json_decode( stripslashes_deep( $csv_string[9] ) );
+
+			if ( empty( $images_url ) ) {
+				$gllr_upload_errors = __( 'Import completed successfully. It is possible that a file created in a previous version of the plugin was imported and the gallery image data will not be fully loaded.', 'gallery-plugin' );
+			}
 
 			$attach_images = array();
 
