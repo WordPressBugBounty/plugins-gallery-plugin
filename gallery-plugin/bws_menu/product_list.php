@@ -21,6 +21,18 @@ $bws_plugins_category = array(
 );
 
 $bws_plugins = array(
+	'adblock-detector-by-bestwebsoft/adblock-detector-by-bestwebsoft.php'                       => array(
+		'category'     => array( 'ecommerce' ),
+		'name'         => 'Adblocker Detector',
+		'description'  => __( 'Detects adblocks and displays a non-closable popup banner asking users to turn off their adblocker.', 'bestwebsoft' ),
+		'link'         => 'https://bestwebsoft.com/products/wordpress/plugins/adblock-detector/?k=04387cfc31fc8b9553e4741392762231&pn=' . $bws_plugin_info['id'] . '&v=' . $bws_plugin_info['version'] . '&wp_v=' . $wp_version,
+		'settings'     => 'admin.php?page=adblock-detector-by-bestwebsoft.php',
+		'pro_version'  => 'adblock-detector-pro/adblock-detector-pro.php',
+		'purchase'     => 'https://bestwebsoft.com/products/wordpress/plugins/adblock-detector/buy/?k=9b3222b005340035eaead38a7a495a0d&pn=' . $bws_plugin_info['id'] . '&v=' . $bws_plugin_info['version'] . '&wp_v=' . $wp_version,
+		'pro_settings' => 'admin.php?page=adblock-detector-pro.php',
+		'icon'         => bws_menu_url( 'icons/plugins/' ) . 'adblock-detector-by-bestwebsoft.png',
+		'install_url'  => 'https://bestwebsoft.com/products/wordpress/plugins/adblock-detector/',
+	),
 	'bike-rental/bike-rental.php'                       => array(
 		'category'     => array( 'ecommerce' ),
 		'name'         => 'Bike Rental',

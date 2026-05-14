@@ -154,6 +154,8 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 
 				$image_names      = array( 'photo', 'album' );
 				$this->wp_sizes[] = 'full';
+				$this->wp_sizes[] = 'photo-thumb';
+				$this->wp_sizes[] = 'album-thumb';
 				foreach ( $image_names as $name ) {
 					$new_image_size      = isset( $_POST[ 'gllr_image_size_' . $name ] ) && in_array( sanitize_text_field( wp_unslash( $_POST[ 'gllr_image_size_' . $name ] ) ), $this->wp_sizes, true ) ? sanitize_text_field( wp_unslash( $_POST[ 'gllr_image_size_' . $name ] ) ) : $this->options[ 'image_size_' . $name ];
 					$custom_image_size_w = isset( $_POST[ 'gllr_custom_image_size_w_' . $name ] ) && is_numeric( $_POST[ 'gllr_custom_image_size_w_' . $name ] ) ? absint( $_POST[ 'gllr_custom_image_size_w_' . $name ] ) : $this->options['custom_size_px'][ $name . '-thumb' ][0];
@@ -173,7 +175,7 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 						}
 					}
 					$this->options[ 'image_size_' . $name ]              = $new_image_size;
-					$this->options['custom_size_px'][ $name . '-thumb' ] = ( $name . '-thumb' === $this->options[ 'image_size_' . $name ] ) ? $custom_size_px : $this->options['custom_size_px'][ $name . '-thumb' ];
+					$this->options['custom_size_px'][ $name . '-thumb' ] = ( $name . '-thumb' === $new_image_size ) ? $custom_size_px : $this->options['custom_size_px'][ $name . '-thumb' ];
 				}
 
 				/* Settings Tab */
@@ -213,6 +215,7 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 				$this->options['lightbox_download_link']                 = isset( $_POST['gllr_lightbox_download_link'] ) ? 1 : 0;
 				$this->options['lightbox_arrows']                        = isset( $_POST['gllr_lightbox_arrows'] ) ? 1 : 0;
 				$this->options['single_lightbox_for_multiple_galleries'] = isset( $_POST['gllr_single_lightbox_for_multiple_galleries'] ) ? 1 : 0;
+				$this->options['download_button']                        = isset( $_POST['gllr_download_button'] ) ? 1 : 0;
 
 				$this->options = apply_filters( 'gllr_save_additional_options', $this->options );
 
@@ -237,6 +240,8 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 
 				if ( isset( $need_image_update ) ) {
 					$this->options['need_image_update'] = 1;
+				} else {
+					unset( $this->options['need_image_update'] );
 				}
 
 				if ( ! empty( $this->cstmsrch_options ) ) {
@@ -475,7 +480,7 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 					<tr class="gllr_for_custom_image_size">
 						<th scope="row"><?php esc_html_e( 'Custom Image Size', 'gallery-plugin' ); ?> </th>
 						<td>
-							<input type="number" name="gllr_custom_image_size_w_photo" min="1" max="10000" value="<?php echo esc_attr( $this->options['custom_size_px']['photo-thumb'][0] ); ?>" /> x <input type="number" name="gllr_custom_image_size_h_photo" min="1" max="10000" value="<?php echo esc_attr( $this->options['custom_size_px']['photo-thumb'][1] ); ?>" /> <?php esc_html_e( 'px', 'gallery-plugin' ); ?>
+							<input type="number" name="gllr_custom_image_size_w_photo" min="1" max="10000" value="<?php echo ! empty( $this->options['custom_size_px']['photo-thumb'][0] ) ? esc_attr( $this->options['custom_size_px']['photo-thumb'][0] ) : 120; ?>" /> x <input type="number" name="gllr_custom_image_size_h_photo" min="1" max="10000" value="<?php echo ! empty( $this->options['custom_size_px']['photo-thumb'][1] ) ? esc_attr( $this->options['custom_size_px']['photo-thumb'][1] ) : 80; ?>" /> <?php esc_html_e( 'px', 'gallery-plugin' ); ?>
 							<div class="bws_info"><?php esc_html_e( "Adjust these values based on the number of columns in your gallery. This won't effect the full size of your images in the lightbox.", 'gallery-plugin' ); ?></div>
 						</td>
 					</tr>
@@ -706,12 +711,13 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Disable Fancybox', 'gallery-plugin' ); ?></th>
 						<td>
-							<input type="checkbox" name="gllr_disable_foreing_fancybox" value="1" 
-							<?php
-							if ( 1 === absint( $this->options['disable_foreing_fancybox'] ) ) {
-								echo 'checked="checked"';}
-							?>
-							/> <span class="bws_info"><?php esc_html_e( 'Enable to avoid possible conflicts with a 3rd party Fancybox.', 'gallery-plugin' ); ?></span>
+							<input type="checkbox" name="gllr_disable_foreing_fancybox" value="1" <?php checked( $this->options['disable_foreing_fancybox'], 1 ); ?> /> <span class="bws_info"><?php esc_html_e( 'Enable to avoid possible conflicts with a 3rd party Fancybox.', 'gallery-plugin' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Enable Download button', 'gallery-plugin' ); ?></th>
+						<td>
+							<input type="checkbox" name="gllr_download_button" value="1" <?php checked( $this->options['download_button'], 1 ); ?> <?php disabled( ! class_exists( 'ZipArchive' ), true ); ?> /> <span class="bws_info"><?php esc_html_e( 'Enable Download button for single Gallery', 'gallery-plugin' ); ?></span>
 						</td>
 					</tr>
 				</table>
@@ -781,7 +787,7 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 				<tr class="gllr_for_custom_image_size_album">
 					<th scope="row"><?php esc_html_e( 'Custom Cover Image Size', 'gallery-plugin' ); ?> </th>
 					<td>
-						<input type="number" name="gllr_custom_image_size_w_album" min="1" max="10000" value="<?php echo esc_attr( $this->options['custom_size_px']['album-thumb'][0] ); ?>" /> x <input type="number" name="gllr_custom_image_size_h_album" min="1" max="10000" value="<?php echo esc_attr( $this->options['custom_size_px']['album-thumb'][1] ); ?>" /> <?php esc_html_e( 'px', 'gallery-plugin' ); ?>
+						<input type="number" name="gllr_custom_image_size_w_album" min="1" max="10000" value="<?php echo ! empty( $this->options['custom_size_px']['album-thumb'][0] ) ? esc_attr( $this->options['custom_size_px']['album-thumb'][0] ) : 160; ?>" /> x <input type="number" name="gllr_custom_image_size_h_album" min="1" max="10000" value="<?php echo ! empty( $this->options['custom_size_px']['album-thumb'][1] ) ? esc_attr( $this->options['custom_size_px']['album-thumb'][1] ) : 120; ?>" /> <?php esc_html_e( 'px', 'gallery-plugin' ); ?>
 					</td>
 				</tr>
 			</table>

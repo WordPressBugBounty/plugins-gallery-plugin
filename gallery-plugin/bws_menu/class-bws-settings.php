@@ -387,6 +387,8 @@ if ( ! class_exists( 'Bws_Settings_Tabs' ) ) {
 					$notice = $result['notice'];
 				}
 				/* check demo data */
+			} elseif ( isset( $_POST['bws_pro_reset_custom_code'] ) && check_admin_referer( $this->plugin_basename, 'bws_nonce_name' ) ) {
+				$this->get_custom_code( true );
 			} else {
 				$demo_result = ! empty( $this->demo_data ) ? $this->demo_data->bws_handle_demo_data() : false;
 				if ( false !== $demo_result ) {
@@ -477,7 +479,7 @@ if ( ! class_exists( 'Bws_Settings_Tabs' ) ) {
 		 *
 		 * @access private
 		 */
-		private function get_custom_code() {
+		private function get_custom_code( $flag_remove = false ) {
 			global $bstwbsftwppdtplgns_options, $wp_filesystem;
 
 			$this->custom_code_args = array(
@@ -508,6 +510,10 @@ if ( ! class_exists( 'Bws_Settings_Tabs' ) ) {
 				$file      = 'bws-custom-code.' . $extension;
 				$real_file = $folder . '/' . $file;
 
+				if ( true === $flag_remove && $wp_filesystem->exists( $real_file ) ) {
+					$wp_filesystem->delete( $real_file, false, 'f' );
+				}
+
 				if ( $wp_filesystem->exists( $real_file ) ) {
 					update_recently_edited( $real_file );
 					$this->custom_code_args[ "content_{$extension}" ] = $wp_filesystem->get_contents( $real_file );
@@ -515,13 +521,13 @@ if ( ! class_exists( 'Bws_Settings_Tabs' ) ) {
 						( ! $this->is_multisite && isset( $bstwbsftwppdtplgns_options['custom_code'][ $file ] ) ) ) {
 						$this->custom_code_args[ "is_{$extension}_active" ] = true;
 					}
-					if ( is_writeable( $real_file ) ) {
+					if ( $wp_filesystem->is_writable( $real_file ) ) {
 						$this->custom_code_args[ "{$extension}_writeable" ] = true;
 					}
 				} else {
 					$this->custom_code_args[ "{$extension}_writeable" ] = true;
 					if ( 'php' === $extension ) {
-						$this->custom_code_args[ "content_{$extension}" ] = '<?php' . "\n" . "if ( ! defined( 'ABSPATH' ) ) exit;" . "\n" . "if ( ! defined( 'BWS_GLOBAL' ) ) exit;" . "\n\n" . '/* Start your code here */' . "\n";
+						$this->custom_code_args[ "content_{$extension}" ] = '<?php' . PHP_EOL . "if ( ! defined( 'ABSPATH' ) || ! defined( 'BWS_GLOBAL' ) ) exit;" . PHP_EOL . PHP_EOL . '/* Start your code here */' . PHP_EOL;
 					}
 				}
 			}
@@ -552,7 +558,7 @@ if ( ! class_exists( 'Bws_Settings_Tabs' ) ) {
 						<div class="bws_pro_version">
 							<?php
 							if ( ! current_user_can( 'edit_plugins' ) ) {
-								echo '<p>' . esc_html__( 'You do not have sufficient permissions to edit plugins for this site.', 'bestwebsoft' ) . '</p>';
+								echo '<p>' . esc_html__( 'You do not have sufficient permissions to edit plugins for this site.', 'bestwebsoft' ) . '</p></div></div></div>';
 								return;
 							}
 
@@ -615,6 +621,9 @@ if ( ! class_exists( 'Bws_Settings_Tabs' ) ) {
 						<a class="bws_button" href="<?php echo esc_url( $this->plugins_info['PluginURI'] ); ?>?k=<?php echo esc_attr( $this->link_key ); ?>&amp;pn=<?php echo esc_attr( $this->link_pn ); ?>&amp;v=<?php echo esc_attr( $this->plugins_info['Version'] ); ?>&amp;wp_v=<?php echo esc_attr( $wp_version ); ?>" target="_blank" title="<?php echo esc_html( $this->plugins_info['Name'] ); ?>">Upgrade to Pro</a>
 						<div class="clear"></div>
 					</div>
+				</div>
+				<div class="inline" style="margin-top: 15px;">
+					<input type="submit" class="button button-primary" name="bws_pro_reset_custom_code" value="<?php esc_html_e( 'Erase all custom code', 'bestwebsoft' ); ?>" onclick="return confirm( '<?php esc_html_e( 'Are you sure you want to delete all custom code?', 'bestwebsoft' ); ?>' );" />
 				</div>
 				<?php
 			} else {

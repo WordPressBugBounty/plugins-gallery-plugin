@@ -235,6 +235,15 @@ ul.gallery {
 	background: rgba(0, 0, 0, 0.3);
 	box-sizing: border-box;
 }
+.button {
+	border: none;
+	border-radius: 5px;
+	box-sizing: border-box;
+	color: #fff;
+	outline: none;
+	padding: 0.76rem 1rem;
+	text-decoration: none;
+}
 @media screen and (min-width: 61.5625em) {
 	.gllr_twentysixteen.single-gallery .hentry,
 	.gllr_twentysixteen.single-bws-gallery .hentry {
@@ -370,6 +379,7 @@ ul.gallery {
 
 .gllr_grid {
 	flex-direction: column;
+	display: flex;
 }
 .gllr_single_image_text_under {
 	color: #888;
@@ -377,4 +387,8 @@ ul.gallery {
 .gllr_twentytwentyone .gllr-widget-cell-item .button {
 	display: inline-block; 
 	font-size: 14px;
+}
+.gllr-download {
+	margin-top: 30px;
+	display: inline-block;
 }

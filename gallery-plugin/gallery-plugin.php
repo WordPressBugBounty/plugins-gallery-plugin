@@ -6,7 +6,7 @@ Description: Add beautiful galleries, albums & images to your WordPress website 
 Author: BestWebSoft
 Text Domain: gallery-plugin
 Domain Path: /languages
-Version: 4.7.7
+Version: 4.7.8
 Author URI: https://bestwebsoft.com/
 License: GPLv2 or later
  */
@@ -126,6 +126,73 @@ if ( ! function_exists( 'gllr_init' ) ) {
 			add_action( 'template_include', 'gllr_template_include' );
 		}
 
+		if ( 1 === absint( $gllr_options['download_button'] ) && isset( $_GET['download'] ) ) {			
+			$gallery_id = intval( $_GET['download'] );
+			if ( wp_verify_nonce( $_REQUEST['_wpnonce'], 'gllr_download_gallery' ) && class_exists( 'ZipArchive' ) && ! empty( $gallery_id ) ) {
+				if ( ! function_exists( 'WP_Filesystem' ) ) {
+					require_once ABSPATH . 'wp-admin/includes/file.php';
+				}
+				WP_Filesystem();
+				global $wp_filesystem;
+
+				$gallery_images = get_posts(
+					array(
+						'showposts'      => -1,
+						'what_to_show'   => 'posts',
+						'post_status'    => 'inherit',
+						'post_type'      => 'attachment',
+						'orderby'        => $gllr_options['order_by'],
+						'order'          => $gllr_options['order'],
+						'meta_key'       => '_gallery_order_' . $gallery_id,
+					)
+				);
+				$files = array();
+				if ( ! empty( $gallery_images ) ) {
+					foreach( $gallery_images as $image ) {
+						$file_path = get_attached_file( $image->ID );
+						if ( $wp_filesystem->is_file( $file_path ) ) {
+							$files[] = $file_path;
+						}
+					}
+				}
+				if ( ! empty( $files ) ) {
+					$zip        = new ZipArchive();
+					$upload_dir = wp_upload_dir();
+					$gallery_title = get_the_title( $gallery_id );
+					if ( ! empty( $gallery_title ) ) {
+						$gallery_title = sanitize_title( $gallery_title );
+					} else {
+						$gallery_title = $gallery_id;
+					}
+					$zip_name   = 'gallery_' . $gallery_title . '.zip';
+					$zip_file   = $upload_dir['path'] . '/' . $zip_name;
+					if ( $zip->open( $zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE ) === TRUE ) {
+						foreach ( $files as $file ) {
+							$zip->addFile( $file, basename( $file ) );
+						}
+						$zip->close();
+					}
+					$file_size = filesize( $zip_file );
+					header( 'HTTP/1.1 200 Ok' );
+					header( 'Content-Length: ' . $file_size );
+					header( 'Content-Type: application/x-zip-compressed');
+					header( 'Last-Modified: ' . gmdate('r', filemtime( $zip_file ) ) );
+					header( 'Content-Disposition: attachment; filename="' . basename( $zip_file ) . '";');
+					$f = fopen( $zip_file, 'rb' );
+					while ( ! feof( $f ) and ! connection_status() ) {
+						echo fread( $f, 1000000 );
+						flush();
+						@ob_flush();
+					}
+					fclose( $f );
+					if ( file_exists( $zip_file ) ) {
+						unlink( $zip_file );
+					}
+					wp_die();
+				}
+			}
+		}
+
 		/* Add media button to the gallery post type */
 		if (
 			( isset( $_GET['post'] ) && get_post_type( sanitize_text_field( wp_unslash( $_GET['post'] ) ) ) === $gllr_options['post_type_name'] ) ||
@@ -149,26 +216,25 @@ if ( ! function_exists( 'gllr_init' ) ) {
 		 */
 		if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) ) {
 			wp_register_block_types_from_metadata_collection( __DIR__ . '/includes/build', __DIR__ . '/includes/build/blocks-manifest.php' );
-			return;
-		}
-
-		/**
-		 * Registers the block(s) metadata from the `blocks-manifest.php` file.
-		 * Added to WordPress 6.7 to improve the performance of block type registration.
-		 *
-		 * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
-		 */
-		if ( function_exists( 'wp_register_block_metadata_collection' ) ) {
-			wp_register_block_metadata_collection( __DIR__ . '/includes/build', __DIR__ . '/includes/build/blocks-manifest.php' );
-		}
-		/**
-		 * Registers the block type(s) in the `blocks-manifest.php` file.
-		 *
-		 * @see https://developer.wordpress.org/reference/functions/register_block_type/
-		 */
-		$manifest_data = require __DIR__ . '/includes/build/blocks-manifest.php';
-		foreach ( array_keys( $manifest_data ) as $block_type ) {
-			register_block_type( __DIR__ . "/includes/build/{$block_type}" );
+		} else {
+			/**
+			 * Registers the block(s) metadata from the `blocks-manifest.php` file.
+			 * Added to WordPress 6.7 to improve the performance of block type registration.
+			 *
+			 * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
+			 */
+			if ( function_exists( 'wp_register_block_metadata_collection' ) ) {
+				wp_register_block_metadata_collection( __DIR__ . '/includes/build', __DIR__ . '/includes/build/blocks-manifest.php' );
+			}
+			/**
+			 * Registers the block type(s) in the `blocks-manifest.php` file.
+			 *
+			 * @see https://developer.wordpress.org/reference/functions/register_block_type/
+			 */
+			$manifest_data = require __DIR__ . '/includes/build/blocks-manifest.php';
+			foreach ( array_keys( $manifest_data ) as $block_type ) {
+				register_block_type( __DIR__ . "/includes/build/{$block_type}" );
+			}
 		}
 	}
 }
@@ -795,6 +861,7 @@ if ( ! function_exists( 'gllr_get_options_default' ) ) {
 			'default_gallery_category'               => '',
 			/* disable 3rd-party fancybox */
 			'disable_foreing_fancybox'               => 0,
+			'download_button'                        => 0,
 		);
 
 		$option_defaults = apply_filters( 'gllr_get_additional_options_default', $option_defaults );
@@ -1847,6 +1914,18 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 								echo apply_filters( 'the_content', $output );
 							}
 						}
+						if ( 1 === absint( $gllr_options['download_button'] ) ) {
+							$url = add_query_arg(
+								array(
+									'download' => get_the_ID(),
+									'_wpnonce' => wp_create_nonce( 'gllr_download_gallery' ),
+								),
+								get_permalink()
+							);
+							?>
+							<div><a href="<?php echo esc_url( $url ); ?>" class="button wp-block-button__link gllr-download"><?php esc_html_e( 'Download Gallery', 'gallery-plugin' ); ?></a></div>
+							<?php
+						}
 						if ( 1 === absint( $gllr_options['return_link'] ) ) {
 							if ( empty( $gllr_options['return_link_url'] ) ) {
 								if ( ! empty( $gllr_options['page_id_gallery_template'] ) ) {
@@ -2692,7 +2771,7 @@ if ( ! function_exists( 'gllr_wp_head' ) ) {
 			$gllr_plugin_info = get_plugin_data( __FILE__ );
 		}
 
-		wp_enqueue_style( 'gllr_stylesheet', plugins_url( 'css/frontend_style.css', __FILE__ ), array( 'dashicons' ), $gllr_plugin_info['Version'] );
+		wp_enqueue_style( 'gllr_stylesheet', plugins_url( 'css/frontend_style.css', __FILE__ ), array( 'dashicons' ), $gllr_plugin_info['Version'] . '.1' );
 		do_action( 'gllr_include_plus_style' );
 
 		if ( $gllr_options['enable_lightbox'] ) {
@@ -3185,6 +3264,19 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 							}
 							?>
 						</div><!-- .gallery_box_single -->
+						<?php
+						if ( 1 === absint( $gllr_options['download_button'] ) ) {
+							$url = add_query_arg(
+								array(
+									'download' => get_the_ID(),
+									'_wpnonce' => wp_create_nonce( 'gllr_download_gallery' ),
+								),
+								get_permalink()
+							);
+							?>
+							<div><a href="<?php echo esc_url( $url ); ?>" class="button wp-block-button__link gllr-download"><?php esc_html_e( 'Download Gallery', 'gallery-plugin' ); ?></a></div>
+							<?php
+						} ?>
 						<div class="gllr_clear"></div>
 						<?php
 					}
