@@ -6,7 +6,7 @@ Description: Add beautiful galleries, albums & images to your WordPress website 
 Author: BestWebSoft
 Text Domain: gallery-plugin
 Domain Path: /languages
-Version: 4.7.8
+Version: 4.7.9
 Author URI: https://bestwebsoft.com/
 License: GPLv2 or later
  */
@@ -1116,7 +1116,7 @@ if ( ! function_exists( 'gllr_save_postdata' ) ) {
 						update_post_meta( absint( $post_order_id ), '_gallery_order_' . $post->ID, $i );
 						$i++;
 					}
-					update_post_meta( $post->ID, '_gallery_images', implode( ',', array_keys( $_POST[ '_gallery_order_' . $post->ID ] ) ) );
+					update_post_meta( $post->ID, '_gallery_images', implode( ',', array_map( 'absint', array_keys( $_POST[ '_gallery_order_' . $post->ID ] ) ) ) );
 				}
 
 				if ( ( ( isset( $_POST['action-top'] ) && 'delete' === $_POST['action-top'] ) ||
@@ -2531,7 +2531,11 @@ if ( ! function_exists( 'gllr_custom_columns' ) ) {
 				if ( empty( $images_id ) ) {
 					echo 0;
 				} else {
-					echo absint( $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $wpdb->posts . ' WHERE ID IN( ' . $images_id . ' )' ) );
+					$images_array = explode( ',', $images_id );
+					if ( ! empty( $images_array ) ) {
+						$images_array = array_unique( array_map( 'absint', $images_array ) );
+					}
+					echo absint( $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $wpdb->posts . ' WHERE ID IN( ' . implode( ',', $images_array ) . ' )' ) );
 				}
 				break;
 			case 'gallery_categories':

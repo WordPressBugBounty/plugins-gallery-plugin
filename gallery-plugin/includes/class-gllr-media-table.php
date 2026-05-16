@@ -55,7 +55,11 @@ if ( ! class_exists( 'Gllr_Media_Table' ) ) {
 			if ( empty( $images_id ) ) {
 				$total_items = 0;
 			} else {
-				$total_items = $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $wpdb->posts . ' WHERE ID IN( ' . $images_id . ' )' );
+				$images_array = explode( ',', $images_id );
+				if ( ! empty( $images_array ) ) {
+					$images_array = array_unique( array_map( 'absint', $images_array ) );
+				}
+				$total_items = $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $wpdb->posts . ' WHERE ID IN( ' . implode( ',', $images_array ) . ' )' );
 			}
 
 			$per_page = -1;
@@ -120,7 +124,11 @@ if ( ! class_exists( 'Gllr_Media_Table' ) ) {
 			if ( empty( $images_id ) ) {
 				$total_items = 0;
 			} else {
-				$total_items = $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $wpdb->posts . ' WHERE ID IN( ' . $images_id . ' )' );
+				$images_array = explode( ',', $images_id );
+				if ( ! empty( $images_array ) ) {
+					$images_array = array_unique( array_map( 'absint', $images_array ) );
+				}
+				$total_items = $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $wpdb->posts . ' WHERE ID IN( ' . implode( ',', $images_array ) . ' )' );
 			}
 
 			if ( $total_items > 0 ) {

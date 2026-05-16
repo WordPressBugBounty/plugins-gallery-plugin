@@ -4,7 +4,7 @@ Donate link: https://bestwebsoft.com/donate/
 Tags: add album, add galleries, add images, add pictures, add albums, gallery, gallery plugin, gallery slider, fancy gallery, slideshow, lightbox, fullscreen gallery
 Requires at least: 6.5
 Tested up to: 7.0
-Stable tag: 4.7.8
+Stable tag: 4.7.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -228,6 +228,9 @@ body {
 11. The adding of the Latest Galleries widget.
 
 == Changelog ==
+
+= V4.7.9 - 16.05.2026 =
+* Update : Security has been improved.
 
 = V4.7.8 - 14.05.2026 =
 * Update : All functionality was updated for WordPress 7.0.
@@ -751,6 +754,9 @@ body {
 * The file uploader is added to the Galleries page in admin section.
 
 == Upgrade Notice ==
+
+= V4.7.9 =
+* Usability improved.
 
 = V4.7.8 =
 * Usability improved.
