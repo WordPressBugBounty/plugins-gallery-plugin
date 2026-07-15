@@ -6,7 +6,7 @@ Description: Add beautiful galleries, albums & images to your WordPress website 
 Author: BestWebSoft
 Text Domain: gallery-plugin
 Domain Path: /languages
-Version: 4.7.9
+Version: 4.8.0
 Author URI: https://bestwebsoft.com/
 License: GPLv2 or later
  */
@@ -358,6 +358,7 @@ if ( ! function_exists( 'export_gallery_to_csv' ) ) {
 				if ( ! empty( $images ) ) {
 					$images = explode(',', $images );
 					foreach ( $images as $image ) {
+						$image               = absint( $image );
 						$images_url[]        = wp_get_attachment_url( $image );
 						$images_title[]      = get_the_title( $image );
 						$image_postmeta      = get_post_meta( $image );
@@ -1112,11 +1113,16 @@ if ( ! function_exists( 'gllr_save_postdata' ) ) {
 			) {
 				if ( isset( $_POST[ '_gallery_order_' . $post->ID ] ) ) {
 					$i = 1;
+					$_gallery_order_array = array();
 					foreach ( $_POST[ '_gallery_order_' . $post->ID ] as $post_order_id => $order_id ) {
-						update_post_meta( absint( $post_order_id ), '_gallery_order_' . $post->ID, $i );
-						$i++;
+						$post_order_id = absint( wp_unslash( $post_order_id ) );
+						if ( 0 < $post_order_id ) {
+							update_post_meta( absint( $post_order_id ), '_gallery_order_' . $post->ID, $i );
+							$i++;
+							$_gallery_order_array[] = $post_order_id;
+						}
 					}
-					update_post_meta( $post->ID, '_gallery_images', implode( ',', array_map( 'absint', array_keys( $_POST[ '_gallery_order_' . $post->ID ] ) ) ) );
+					update_post_meta( $post->ID, '_gallery_images', implode( ',', $_gallery_order_array ) );
 				}
 
 				if ( ( ( isset( $_POST['action-top'] ) && 'delete' === $_POST['action-top'] ) ||
@@ -1126,8 +1132,11 @@ if ( ! function_exists( 'gllr_save_postdata' ) ) {
 					$gallery_images_array = explode( ',', $gallery_images );
 					$gallery_images_array = array_flip( $gallery_images_array );
 					foreach ( $_POST['media'] as $delete_id ) {
-						delete_post_meta( absint( $delete_id ), '_gallery_order_' . $post->ID );
-						unset( $gallery_images_array[ absint( $delete_id ) ] );
+						$delete_id = absint( wp_unslash( $delete_id ) );
+						if ( 0 < $delete_id ) {
+							delete_post_meta( $delete_id, '_gallery_order_' . $post->ID );
+							unset( $gallery_images_array[ $delete_id ] );
+						}
 					}
 					$gallery_images_array = array_flip( $gallery_images_array );
 					$gallery_images       = implode( ',', $gallery_images_array );
@@ -1135,38 +1144,41 @@ if ( ! function_exists( 'gllr_save_postdata' ) ) {
 				}
 				if ( isset( $_REQUEST['gllr_image_text'] ) ) {
 					foreach ( $_REQUEST['gllr_image_text'] as $gllr_image_text_key => $gllr_image_text ) {
+						$gllr_image_text_key = absint( wp_unslash( $gllr_image_text_key ) );
 						$value = sanitize_text_field( wp_unslash( $gllr_image_text ) );
-						if ( get_post_meta( absint( $gllr_image_text_key ), 'gllr_image_text', false ) ) {
+						if ( 0 < $gllr_image_text_key && get_post_meta( $gllr_image_text_key, 'gllr_image_text', false ) ) {
 							/* Custom field has a value and this custom field exists in database */
-							update_post_meta( absint( $gllr_image_text_key ), 'gllr_image_text', $value );
-						} elseif ( $value ) {
+							update_post_meta( $gllr_image_text_key, 'gllr_image_text', $value );
+						} elseif ( $value && 0 < $gllr_image_text_key ) {
 							/* Custom field has a value, but this custom field does not exist in database */
-							add_post_meta( absint( $gllr_image_text_key ), 'gllr_image_text', $value );
+							add_post_meta( $gllr_image_text_key, 'gllr_image_text', $value );
 						}
 					}
 				}
 				if ( isset( $_REQUEST['gllr_link_url'] ) ) {
 					foreach ( $_REQUEST['gllr_link_url'] as $gllr_link_url_key => $gllr_link_url ) {
+						$gllr_link_url_key = absint( wp_unslash( $gllr_link_url_key ) );
 						$value = esc_url_raw( wp_unslash( trim( $gllr_link_url ) ) );
 						if ( filter_var( $value, FILTER_VALIDATE_URL ) === false ) {
 							$value = '';
 						}
-						if ( get_post_meta( absint( $gllr_link_url_key ), 'gllr_link_url', false ) ) {
+						if ( 0 < $gllr_link_url_key && get_post_meta( $gllr_link_url_key, 'gllr_link_url', false ) ) {
 							/* Custom field has a value and this custom field exists in database */
-							update_post_meta( absint( $gllr_link_url_key ), 'gllr_link_url', $value );
-						} elseif ( $value ) {
+							update_post_meta( $gllr_link_url_key, 'gllr_link_url', $value );
+						} elseif ( $value && 0 < $gllr_link_url_key ) {
 							/* Custom field has a value, but this custom field does not exist in database */
-							add_post_meta( absint( $gllr_link_url_key ), 'gllr_link_url', $value );
+							add_post_meta( $gllr_link_url_key, 'gllr_link_url', $value );
 						}
 					}
 				}
 				if ( isset( $_REQUEST['gllr_image_alt_tag'] ) ) {
 					foreach ( $_REQUEST['gllr_image_alt_tag'] as $gllr_image_alt_tag_key => $gllr_image_alt_tag ) {
+						$gllr_image_alt_tag_key = absint( wp_unslash( $gllr_image_alt_tag_key ) );
 						$value = sanitize_text_field( wp_unslash( $gllr_image_alt_tag ) );
-						if ( get_post_meta( absint( $gllr_image_alt_tag_key ), 'gllr_image_alt_tag', false ) ) {
+						if ( 0 < $gllr_image_alt_tag_key && get_post_meta( absint( $gllr_image_alt_tag_key ), 'gllr_image_alt_tag', false ) ) {
 							/* Custom field has a value and this custom field exists in database */
-							update_post_meta( absint( $gllr_image_alt_tag_key ), 'gllr_image_alt_tag', $value );
-						} elseif ( $value ) {
+							update_post_meta( $gllr_image_alt_tag_key, 'gllr_image_alt_tag', $value );
+						} elseif ( $value && 0 < $gllr_image_alt_tag_key ) {
 							/* Custom field has a value, but this custom field does not exist in database */
 							add_post_meta( absint( $gllr_image_alt_tag_key ), 'gllr_image_alt_tag', $value );
 						}
