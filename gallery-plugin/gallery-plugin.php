@@ -6,7 +6,7 @@ Description: Add beautiful galleries, albums & images to your WordPress website 
 Author: BestWebSoft
 Text Domain: gallery-plugin
 Domain Path: /languages
-Version: 4.8.0
+Version: 4.8.1
 Author URI: https://bestwebsoft.com/
 License: GPLv2 or later
  */
@@ -126,7 +126,7 @@ if ( ! function_exists( 'gllr_init' ) ) {
 			add_action( 'template_include', 'gllr_template_include' );
 		}
 
-		if ( 1 === absint( $gllr_options['download_button'] ) && isset( $_GET['download'] ) ) {			
+		if ( isset( $gllr_options['download_button'] ) && 1 === absint( $gllr_options['download_button'] ) && isset( $_GET['download'] ) ) {			
 			$gallery_id = intval( $_GET['download'] );
 			if ( wp_verify_nonce( $_REQUEST['_wpnonce'], 'gllr_download_gallery' ) && class_exists( 'ZipArchive' ) && ! empty( $gallery_id ) ) {
 				if ( ! function_exists( 'WP_Filesystem' ) ) {

@@ -717,7 +717,7 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Enable Download button', 'gallery-plugin' ); ?></th>
 						<td>
-							<input type="checkbox" name="gllr_download_button" value="1" <?php checked( $this->options['download_button'], 1 ); ?> <?php disabled( ! class_exists( 'ZipArchive' ), true ); ?> /> <span class="bws_info"><?php esc_html_e( 'Enable Download button for single Gallery', 'gallery-plugin' ); ?></span>
+							<input type="checkbox" name="gllr_download_button" value="1" <?php checked( isset( $this->options['download_button'] ) && $this->options['download_button'], 1 ); ?> <?php disabled( ! class_exists( 'ZipArchive' ), true ); ?> /> <span class="bws_info"><?php esc_html_e( 'Enable Download button for single Gallery', 'gallery-plugin' ); ?></span>
 						</td>
 					</tr>
 				</table>
