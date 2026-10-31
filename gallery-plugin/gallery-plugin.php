@@ -6,7 +6,7 @@ Description: Add beautiful galleries, albums & images to your WordPress website 
 Author: BestWebSoft
 Text Domain: gallery-plugin
 Domain Path: /languages
-Version: 4.8.1
+Version: 4.8.2
 Author URI: https://bestwebsoft.com/
 License: GPLv2 or later
  */
@@ -829,6 +829,7 @@ if ( ! function_exists( 'gllr_get_options_default' ) ) {
 			'border_images'                          => 1,
 			'border_images_width'                    => 10,
 			'border_images_color'                    => '#F1F1F1',
+			'lazy_loading'                           => 0,
 			'order_by'                               => 'meta_value_num',
 			'order'                                  => 'ASC',
 			'return_link'                            => 0,
@@ -1671,15 +1672,27 @@ if ( ! function_exists( 'gllr_template_content' ) ) {
 					?>
 					<a rel="bookmark" href="<?php echo esc_url( get_permalink() ); ?>" title="<?php echo esc_html( $title ); ?>">
 						<?php
-						printf(
-							'<img %1$s %2$s style="%3$s %4$s" alt="%5$s" title="%5$s" src="%6$s" /><div class="clear"></div>',
-							esc_html( $width ),
-							esc_html( $height ),
-							esc_html( $width_style ),
-							esc_html( $border ),
-							esc_html( $title ),
-							esc_url( $featured_image[0] )
-						);
+						if ( 1 === $gllr_options['lazy_loading'] ) {
+							printf(
+								'<img %1$s %2$s style="%3$s %4$s" alt="%5$s" title="%5$s" src="%6$s" loading="lazy" /><div class="clear"></div>',
+								esc_html( $width ),
+								esc_html( $height ),
+								esc_html( $width_style ),
+								esc_html( $border ),
+								esc_html( $title ),
+								esc_url( $featured_image[0] )
+							);
+						} else {
+							printf(
+								'<img %1$s %2$s style="%3$s %4$s" alt="%5$s" title="%5$s" src="%6$s" /><div class="clear"></div>',
+								esc_html( $width ),
+								esc_html( $height ),
+								esc_html( $width_style ),
+								esc_html( $border ),
+								esc_html( $title ),
+								esc_url( $featured_image[0] )
+							);
+						}
 						?>
 						<div class="clear"></div>
 					</a>
@@ -1844,43 +1857,9 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 													?>
 													<a href="<?php echo esc_url( $url_for_link ); ?>" title="<?php echo esc_html( $image_text ); ?>" target="_blank">
 														<?php
-														printf(
-															'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" />',
-															esc_html( $width_html ),
-															esc_html( $height_html ),
-															esc_html( $width_style ),
-															esc_html( $height_style ),
-															esc_html( $border ),
-															esc_html( $image_alt_tag ),
-															esc_html( $image_text ),
-															esc_url( $image_attributes[0] )
-														);
-														?>
-													</a>
-													<?php
-												} else {
-													if ( 1 !== absint( $gllr_options['enable_image_opening'] ) ) {
-														?>
-														<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="<?php echo esc_url( $image_attributes_large[0] ); ?>" title="<?php echo esc_html( $image_text ); ?>" >
-															<?php
+														if ( 1 === $gllr_options['lazy_loading'] ) {
 															printf(
-																'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
-																esc_html( $width_html ),
-																esc_html( $height_html ),
-																esc_html( $width_style ),
-																esc_html( $height_style ),
-																esc_html( $border ),
-																esc_html( $image_alt_tag ),
-																esc_html( $image_text ),
-																esc_url( $image_attributes_full[0] )
-															);
-															?>
-														</a>
-													<?php } else { ?>
-														<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="#" style="pointer-events: none;" title="<?php echo esc_html( $image_text ); ?>" >
-															<?php
-															printf(
-																'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
+																'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" loading="lazy" />',
 																esc_html( $width_html ),
 																esc_html( $height_html ),
 																esc_html( $width_style ),
@@ -1890,6 +1869,82 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 																esc_html( $image_text ),
 																esc_url( $image_attributes[0] )
 															);
+														} else {
+															printf(
+																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" />',
+																	esc_html( $width_html ),
+																	esc_html( $height_html ),
+																	esc_html( $width_style ),
+																	esc_html( $height_style ),
+																	esc_html( $border ),
+																	esc_html( $image_alt_tag ),
+																	esc_html( $image_text ),
+																	esc_url( $image_attributes[0] )
+																);
+														}
+														?>
+													</a>
+													<?php
+												} else {
+													if ( 1 !== absint( $gllr_options['enable_image_opening'] ) ) {
+														?>
+														<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="<?php echo esc_url( $image_attributes_large[0] ); ?>" title="<?php echo esc_html( $image_text ); ?>" >
+															<?php
+															if ( 1 === $gllr_options['lazy_loading'] ) {
+																printf(
+																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" loading="lazy" />',
+																	esc_html( $width_html ),
+																	esc_html( $height_html ),
+																	esc_html( $width_style ),
+																	esc_html( $height_style ),
+																	esc_html( $border ),
+																	esc_html( $image_alt_tag ),
+																	esc_html( $image_text ),
+																	esc_url( $image_attributes_full[0] )
+																);
+															} else {
+																printf(
+																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
+																	esc_html( $width_html ),
+																	esc_html( $height_html ),
+																	esc_html( $width_style ),
+																	esc_html( $height_style ),
+																	esc_html( $border ),
+																	esc_html( $image_alt_tag ),
+																	esc_html( $image_text ),
+																	esc_url( $image_attributes_full[0] )
+																);
+															}
+															?>
+														</a>
+													<?php } else { ?>
+														<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="#" style="pointer-events: none;" title="<?php echo esc_html( $image_text ); ?>" >
+															<?php
+															if ( 1 === $gllr_options['lazy_loading'] ) {
+																printf(
+																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" loading="lazy" />',
+																	esc_html( $width_html ),
+																	esc_html( $height_html ),
+																	esc_html( $width_style ),
+																	esc_html( $height_style ),
+																	esc_html( $border ),
+																	esc_html( $image_alt_tag ),
+																	esc_html( $image_text ),
+																	esc_url( $image_attributes[0] )
+																);
+															} else {
+																printf(
+																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
+																	esc_html( $width_html ),
+																	esc_html( $height_html ),
+																	esc_html( $width_style ),
+																	esc_html( $height_style ),
+																	esc_html( $border ),
+																	esc_html( $image_alt_tag ),
+																	esc_html( $image_text ),
+																	esc_url( $image_attributes[0] )
+																);
+															}
 															?>
 														</a>
 														<?php
@@ -2993,16 +3048,29 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 										$height_html  = ! empty( $height ) ? 'height="' . $height . '"' : '';
 										$width_style  = ! empty( $width ) ? 'width:' . $width . 'px;' : '';
 										$height_style = ! empty( $height ) ? 'height:' . $height . 'px;' : '';
-										printf(
-											'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" />',
-											esc_html( $width_html ),
-											esc_html( $height_html ),
-											esc_html( $width_style ),
-											esc_html( $height_style ),
-											esc_html( $border ),
-											esc_html( get_the_title() ),
-											esc_url( $image_attributes[0] )
-										);
+										if ( 1 === $gllr_options['lazy_loading'] ) {
+											printf(
+												'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" loading="lazy" />',
+												esc_html( $width_html ),
+												esc_html( $height_html ),
+												esc_html( $width_style ),
+												esc_html( $height_style ),
+												esc_html( $border ),
+												esc_html( get_the_title() ),
+												esc_url( $image_attributes[0] )
+											);
+										} else {
+											printf(
+												'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" />',
+												esc_html( $width_html ),
+												esc_html( $height_html ),
+												esc_html( $width_style ),
+												esc_html( $height_style ),
+												esc_html( $border ),
+												esc_html( get_the_title() ),
+												esc_url( $image_attributes[0] )
+											);
+										}
 										?>
 									</a>
 									<div class="gallery_detail_box">
@@ -3087,16 +3155,29 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 									$height_html  = ! empty( $height ) ? 'height="' . $height . '"' : '';
 									$width_style  = ! empty( $width ) ? 'width:' . $width . 'px;' : '';
 									$height_style = ! empty( $height ) ? 'height:' . $height . 'px;' : '';
-									printf(
-										'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" />',
-										esc_html( $width_html ),
-										esc_html( $height_html ),
-										esc_html( $width_style ),
-										esc_html( $height_style ),
-										esc_html( $border ),
-										esc_html( get_the_title() ),
-										esc_url( $image_attributes[0] )
-									);
+									if ( 1 === $gllr_options['lazy_loading'] ) {
+										printf(
+											'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" loading="lazy" />',
+											esc_html( $width_html ),
+											esc_html( $height_html ),
+											esc_html( $width_style ),
+											esc_html( $height_style ),
+											esc_html( $border ),
+											esc_html( get_the_title() ),
+											esc_url( $image_attributes[0] )
+										);
+									} else {
+										printf(
+											'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" />',
+											esc_html( $width_html ),
+											esc_html( $height_html ),
+											esc_html( $width_style ),
+											esc_html( $height_style ),
+											esc_html( $border ),
+											esc_html( get_the_title() ),
+											esc_url( $image_attributes[0] )
+										);
+									}
 									?>
 								</a>
 								<div class="gallery_detail_box">
@@ -3185,44 +3266,9 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 														?>
 														<a href="<?php echo esc_url( $url_for_link ); ?>" title="<?php echo esc_html( $image_text ); ?>" target="_blank">
 															<?php
-															printf(
-																'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" />',
-																esc_html( $width_html ),
-																esc_html( $height_html ),
-																esc_html( $width_style ),
-																esc_html( $height_style ),
-																esc_html( $border ),
-																esc_html( $image_alt_tag ),
-																esc_html( $image_text ),
-																esc_url( $image_attributes[0] )
-															);
-															?>
-														</a>
-														<?php
-													} else {
-														if ( 1 !== absint( $gllr_options['enable_image_opening'] ) ) {
-															?>
-															<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="<?php echo esc_url( $image_attributes_large[0] ); ?>" title="<?php echo esc_html( $image_text ); ?>" >
-																<?php
+															if ( 1 === $gllr_options['lazy_loading'] ) {
 																printf(
-																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="%9$s" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
-																	esc_html( $image_alt_tag ),
-																	esc_html( $image_text ),
-																	esc_url( $image_attributes[0] ),
-																	esc_url( $image_attributes_full[0] )
-																);
-																?>
-															</a>
-														<?php } else { ?>
-															<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="#" style="pointer-events: none;" title="<?php echo esc_html( $image_text ); ?>" >
-																<?php
-																printf(
-																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
+																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" loading="lazy" />',
 																	esc_html( $width_html ),
 																	esc_html( $height_html ),
 																	esc_html( $width_style ),
@@ -3232,6 +3278,84 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes[0] )
 																);
+															} else {
+																printf(
+																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" />',
+																	esc_html( $width_html ),
+																	esc_html( $height_html ),
+																	esc_html( $width_style ),
+																	esc_html( $height_style ),
+																	esc_html( $border ),
+																	esc_html( $image_alt_tag ),
+																	esc_html( $image_text ),
+																	esc_url( $image_attributes[0] )
+																);
+															}
+															?>
+														</a>
+														<?php
+													} else {
+														if ( 1 !== absint( $gllr_options['enable_image_opening'] ) ) {
+															?>
+															<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="<?php echo esc_url( $image_attributes_large[0] ); ?>" title="<?php echo esc_html( $image_text ); ?>" >
+																<?php
+																if ( 1 === $gllr_options['lazy_loading'] ) {
+																	printf(
+																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="%9$s" loading="lazy" />',
+																		esc_html( $width_html ),
+																		esc_html( $height_html ),
+																		esc_html( $width_style ),
+																		esc_html( $height_style ),
+																		esc_html( $border ),
+																		esc_html( $image_alt_tag ),
+																		esc_html( $image_text ),
+																		esc_url( $image_attributes[0] ),
+																		esc_url( $image_attributes_full[0] )
+																	);
+																} else {
+																	printf(
+																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="%9$s" />',
+																		esc_html( $width_html ),
+																		esc_html( $height_html ),
+																		esc_html( $width_style ),
+																		esc_html( $height_style ),
+																		esc_html( $border ),
+																		esc_html( $image_alt_tag ),
+																		esc_html( $image_text ),
+																		esc_url( $image_attributes[0] ),
+																		esc_url( $image_attributes_full[0] )
+																	);
+																}
+																?>
+															</a>
+														<?php } else { ?>
+															<a data-fancybox="gallery_fancybox<?php echo 0 === absint( $gllr_options['single_lightbox_for_multiple_galleries'] ) ? '_' . esc_attr( $post->ID ) : ''; ?>" href="#" style="pointer-events: none;" title="<?php echo esc_html( $image_text ); ?>" >
+																<?php
+																if ( 1 === $gllr_options['lazy_loading'] ) {
+																printf(
+																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" loading="lazy" />',
+																		esc_html( $width_html ),
+																		esc_html( $height_html ),
+																		esc_html( $width_style ),
+																		esc_html( $height_style ),
+																		esc_html( $border ),
+																		esc_html( $image_alt_tag ),
+																		esc_html( $image_text ),
+																		esc_url( $image_attributes[0] )
+																	);
+																} else {
+																	printf(
+																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
+																		esc_html( $width_html ),
+																		esc_html( $height_html ),
+																		esc_html( $width_style ),
+																		esc_html( $height_style ),
+																		esc_html( $border ),
+																		esc_html( $image_alt_tag ),
+																		esc_html( $image_text ),
+																		esc_url( $image_attributes[0] )
+																	);
+																}
 																?>
 															</a>
 															<?php

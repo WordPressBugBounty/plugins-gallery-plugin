@@ -217,6 +217,8 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 				$this->options['single_lightbox_for_multiple_galleries'] = isset( $_POST['gllr_single_lightbox_for_multiple_galleries'] ) ? 1 : 0;
 				$this->options['download_button']                        = isset( $_POST['gllr_download_button'] ) ? 1 : 0;
 
+				$this->options['lazy_loading'] = isset( $_POST['gllr_lazy_loading'] ) ? 1 : 0;
+
 				$this->options = apply_filters( 'gllr_save_additional_options', $this->options );
 
 				/**
@@ -593,6 +595,13 @@ if ( ! class_exists( 'Gllr_Settings_Tabs' ) ) {
 							?>
 							/>
 							<span class="bws_info"><?php esc_html_e( 'Enable to make the images in a single gallery unclickable and hide their URLs. This option also disables Lightbox.', 'gallery-plugin' ); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Lazy loading', 'gallery-plugin' ); ?> </th>
+						<td>
+							<input type="checkbox" name="gllr_lazy_loading" <?php checked( $this->options['lazy_loading'] ); ?> />
+							<span class="bws_info"><?php esc_html_e( 'Enable to prevent images being loaded when they are not visible', 'gallery-plugin' ); ?></span>
 						</td>
 					</tr>
 				</table>
