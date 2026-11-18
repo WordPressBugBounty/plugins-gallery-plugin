@@ -791,6 +791,9 @@ if ( ! function_exists( 'bws_admin_enqueue_scripts' ) ) {
 		$plugin_file = array_keys( get_plugins( "/$plugin_dir" ) )[0];
 
 		$include_jquery_ui = false;
+		if ( empty( $bws_plugins ) ) {
+			require dirname( __FILE__ ) . '/product_list.php';
+		}
 		if ( ! empty( $bws_plugins ) ) {
 			$admin_page_free = $pagenow . '?page=' . str_replace( '-pro', '', $page );
 

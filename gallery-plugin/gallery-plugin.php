@@ -6,7 +6,7 @@ Description: Add beautiful galleries, albums & images to your WordPress website 
 Author: BestWebSoft
 Text Domain: gallery-plugin
 Domain Path: /languages
-Version: 4.8.2
+Version: 4.8.3
 Author URI: https://bestwebsoft.com/
 License: GPLv2 or later
  */
@@ -114,7 +114,7 @@ if ( ! function_exists( 'gllr_init' ) ) {
 		}
 
 		/* Function check if plugin is compatible with current WP version  */
-		bws_wp_min_version_check( plugin_basename( __FILE__ ), $gllr_plugin_info, '4.5' );
+		bws_wp_min_version_check( plugin_basename( __FILE__ ), $gllr_plugin_info, '6.5' );
 
 		/* Call register settings function */
 		gllr_settings();
@@ -1666,8 +1666,8 @@ if ( ! function_exists( 'gllr_template_content' ) ) {
 					( 'rows' === $gllr_options['galleries_layout'] ) ? wp_kses_post( ' style="width: ' . ( absint( $width ) + absint( $border_images ) ) . 'px;" data-gllr-width="' . ( absint( $width ) + absint( $border_images ) ) . '"' ) : ''
 				);
 				if ( ! empty( $featured_image[0] ) ) {
-					$width       = ! empty( $width ) ? 'width="' . $width . '"' : '';
-					$height      = ! empty( $height ) ? 'height="' . $height . '"' : '';
+					$width_html  = ! empty( $width ) ? 'width="' . $width . '"' : '';
+					$height_html = ! empty( $height ) ? 'height="' . $height . '"' : '';
 					$width_style = ! empty( $width ) ? 'width:' . $width . 'px;' : '';
 					?>
 					<a rel="bookmark" href="<?php echo esc_url( get_permalink() ); ?>" title="<?php echo esc_html( $title ); ?>">
@@ -1675,20 +1675,20 @@ if ( ! function_exists( 'gllr_template_content' ) ) {
 						if ( 1 === $gllr_options['lazy_loading'] ) {
 							printf(
 								'<img %1$s %2$s style="%3$s %4$s" alt="%5$s" title="%5$s" src="%6$s" loading="lazy" /><div class="clear"></div>',
-								esc_html( $width ),
-								esc_html( $height ),
-								esc_html( $width_style ),
-								esc_html( $border ),
+								$width_html,
+								$height_html,
+								$width_style,
+								$border,
 								esc_html( $title ),
 								esc_url( $featured_image[0] )
 							);
 						} else {
 							printf(
 								'<img %1$s %2$s style="%3$s %4$s" alt="%5$s" title="%5$s" src="%6$s" /><div class="clear"></div>',
-								esc_html( $width ),
-								esc_html( $height ),
-								esc_html( $width_style ),
-								esc_html( $border ),
+								$width_html,
+								$height_html,
+								$width_style,
+								$border,
 								esc_html( $title ),
 								esc_url( $featured_image[0] )
 							);
@@ -1860,11 +1860,11 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 														if ( 1 === $gllr_options['lazy_loading'] ) {
 															printf(
 																'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" loading="lazy" />',
-																esc_html( $width_html ),
-																esc_html( $height_html ),
-																esc_html( $width_style ),
-																esc_html( $height_style ),
-																esc_html( $border ),
+																$width_html,
+																$height_html,
+																$width_style,
+																$height_style,
+																$border,
 																esc_html( $image_alt_tag ),
 																esc_html( $image_text ),
 																esc_url( $image_attributes[0] )
@@ -1872,11 +1872,11 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 														} else {
 															printf(
 																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
+																	$width_html,
+																	$height_html,
+																	$width_style,
+																	$height_style,
+																	$border,
 																	esc_html( $image_alt_tag ),
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes[0] )
@@ -1893,11 +1893,11 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 															if ( 1 === $gllr_options['lazy_loading'] ) {
 																printf(
 																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" loading="lazy" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
+																	$width_html,
+																	$height_html,
+																	$width_style,
+																	$height_style,
+																	$border,
 																	esc_html( $image_alt_tag ),
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes_full[0] )
@@ -1905,11 +1905,11 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 															} else {
 																printf(
 																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
+																	$width_html,
+																	$height_html,
+																	$width_style,
+																	$height_style,
+																	$border,
 																	esc_html( $image_alt_tag ),
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes_full[0] )
@@ -1923,11 +1923,11 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 															if ( 1 === $gllr_options['lazy_loading'] ) {
 																printf(
 																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" loading="lazy" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
+																	$width_html,
+																	$height_html,
+																	$width_style,
+																	$height_style,
+																	$border,
 																	esc_html( $image_alt_tag ),
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes[0] )
@@ -1935,11 +1935,11 @@ if ( ! function_exists( 'gllr_single_template_content' ) ) {
 															} else {
 																printf(
 																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
+																	$width_html,
+																	$height_html,
+																	$width_style,
+																	$height_style,
+																	$border,
 																	esc_html( $image_alt_tag ),
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes[0] )
@@ -3051,22 +3051,22 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 										if ( 1 === $gllr_options['lazy_loading'] ) {
 											printf(
 												'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" loading="lazy" />',
-												esc_html( $width_html ),
-												esc_html( $height_html ),
-												esc_html( $width_style ),
-												esc_html( $height_style ),
-												esc_html( $border ),
+												$width_html,
+												$height_html ,
+												$width_style ,
+												$height_style ,
+												$border ,
 												esc_html( get_the_title() ),
 												esc_url( $image_attributes[0] )
 											);
 										} else {
 											printf(
 												'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" />',
-												esc_html( $width_html ),
-												esc_html( $height_html ),
-												esc_html( $width_style ),
-												esc_html( $height_style ),
-												esc_html( $border ),
+												$width_html,
+												$height_html ,
+												$width_style ,
+												$height_style ,
+												$border ,
 												esc_html( get_the_title() ),
 												esc_url( $image_attributes[0] )
 											);
@@ -3158,22 +3158,22 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 									if ( 1 === $gllr_options['lazy_loading'] ) {
 										printf(
 											'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" loading="lazy" />',
-											esc_html( $width_html ),
-											esc_html( $height_html ),
-											esc_html( $width_style ),
-											esc_html( $height_style ),
-											esc_html( $border ),
+											$width_html,
+											$height_html ,
+											$width_style ,
+											$height_style ,
+											$border ,
 											esc_html( get_the_title() ),
 											esc_url( $image_attributes[0] )
 										);
 									} else {
 										printf(
 											'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%6$s" src="%7$s" />',
-											esc_html( $width_html ),
-											esc_html( $height_html ),
-											esc_html( $width_style ),
-											esc_html( $height_style ),
-											esc_html( $border ),
+											$width_html,
+											$height_html ,
+											$width_style ,
+											$height_style ,
+											$border ,
 											esc_html( get_the_title() ),
 											esc_url( $image_attributes[0] )
 										);
@@ -3269,11 +3269,11 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 															if ( 1 === $gllr_options['lazy_loading'] ) {
 																printf(
 																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" loading="lazy" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
+																	$width_html,
+																	$height_html ,
+																	$width_style ,
+																	$height_style ,
+																	$border ,
 																	esc_html( $image_alt_tag ),
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes[0] )
@@ -3281,11 +3281,11 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 															} else {
 																printf(
 																	'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" />',
-																	esc_html( $width_html ),
-																	esc_html( $height_html ),
-																	esc_html( $width_style ),
-																	esc_html( $height_style ),
-																	esc_html( $border ),
+																	$width_html,
+																	$height_html ,
+																	$width_style ,
+																	$height_style ,
+																	$border ,
 																	esc_html( $image_alt_tag ),
 																	esc_html( $image_text ),
 																	esc_url( $image_attributes[0] )
@@ -3302,11 +3302,11 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 																if ( 1 === $gllr_options['lazy_loading'] ) {
 																	printf(
 																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="%9$s" loading="lazy" />',
-																		esc_html( $width_html ),
-																		esc_html( $height_html ),
-																		esc_html( $width_style ),
-																		esc_html( $height_style ),
-																		esc_html( $border ),
+																		$width_html,
+																		$height_html ,
+																		$width_style ,
+																		$height_style ,
+																		$border ,
 																		esc_html( $image_alt_tag ),
 																		esc_html( $image_text ),
 																		esc_url( $image_attributes[0] ),
@@ -3315,11 +3315,11 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 																} else {
 																	printf(
 																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="%9$s" />',
-																		esc_html( $width_html ),
-																		esc_html( $height_html ),
-																		esc_html( $width_style ),
-																		esc_html( $height_style ),
-																		esc_html( $border ),
+																		$width_html,
+																		$height_html ,
+																		$width_style ,
+																		$height_style ,
+																		$border ,
 																		esc_html( $image_alt_tag ),
 																		esc_html( $image_text ),
 																		esc_url( $image_attributes[0] ),
@@ -3334,11 +3334,11 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 																if ( 1 === $gllr_options['lazy_loading'] ) {
 																printf(
 																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" loading="lazy" />',
-																		esc_html( $width_html ),
-																		esc_html( $height_html ),
-																		esc_html( $width_style ),
-																		esc_html( $height_style ),
-																		esc_html( $border ),
+																		$width_html,
+																		$height_html ,
+																		$width_style ,
+																		$height_style ,
+																		$border ,
 																		esc_html( $image_alt_tag ),
 																		esc_html( $image_text ),
 																		esc_url( $image_attributes[0] )
@@ -3346,11 +3346,11 @@ if ( ! function_exists( 'gllr_shortcode' ) ) {
 																} else {
 																	printf(
 																		'<img %1$s %2$s style="%3$s %4$s %5$s" alt="%6$s" title="%7$s" src="%8$s" rel="#" />',
-																		esc_html( $width_html ),
-																		esc_html( $height_html ),
-																		esc_html( $width_style ),
-																		esc_html( $height_style ),
-																		esc_html( $border ),
+																		$width_html,
+																		$height_html ,
+																		$width_style ,
+																		$height_style ,
+																		$border ,
 																		esc_html( $image_alt_tag ),
 																		esc_html( $image_text ),
 																		esc_url( $image_attributes[0] )
